@@ -8,33 +8,131 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:system-ui;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
-.card{width:100%;max-width:520px;background:#1e293b;padding:40px 35px;border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,0.6);}
-.title{text-align:center;font-size:60px;margin-bottom:30px;font-family:'Audiowide';color:white;}
-input,select{width:100%;padding:16px;border-radius:18px;border:none;background:#334155;color:white;font-size:16px;margin-top:15px;}
-button{margin-top:18px;padding:16px;border-radius:20px;border:none;cursor:pointer;font-weight:600;width:100%;}
-.create-btn{background:linear-gradient(135deg,#7c3aed,#9333ea);color:white;}
-.join-btn{background:#e2e8f0;color:black;}
-.divider{height:1px;background:#334155;margin:30px 0;}
-.avatars{display:flex;justify-content:space-between;margin-top:15px;}
-.avatar{font-size:26px;padding:14px;border-radius:18px;cursor:pointer;}
-.avatar.selected{background:linear-gradient(135deg,#7c3aed,#9333ea);}
-.option{background:#334155;padding:14px;border-radius:14px;margin:8px 0;cursor:pointer;}
-.option:hover{background:#7c3aed;}
-.correct{background:#16a34a !important;}
-.rank-card{background:#334155;padding:10px;border-radius:14px;margin:6px 0;}
-.rank-card:nth-child(1){background:linear-gradient(135deg,#facc15,#f59e0b);color:black;font-weight:700;}
+
+body{
+  font-family:system-ui,-apple-system,sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.card{
+  width:100%;
+  max-width:520px;
+  background:#1e293b;
+  padding:40px 35px;
+  border-radius:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.6);
+}
+
+.title{
+  text-align:center;
+  font-size:60px;
+  margin-bottom:30px;
+  font-family:'Audiowide', cursive;
+  letter-spacing:4px;
+  color:white;
+}
+
+input,select{
+  width:100%;
+  padding:14px;
+  border-radius:16px;
+  border:none;
+  background:#334155;
+  color:white;
+  font-size:15px;
+  margin-top:12px;
+}
+
+button{
+  margin-top:16px;
+  padding:14px;
+  border-radius:18px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  width:100%;
+}
+
+.create-btn{
+  background:linear-gradient(135deg,#7c3aed,#9333ea);
+  color:white;
+}
+
+.join-btn{
+  background:#e2e8f0;
+  color:black;
+}
+
+.avatars{
+  display:flex;
+  justify-content:space-between;
+  margin-top:12px;
+}
+
+.avatar{
+  font-size:26px;
+  padding:12px;
+  border-radius:16px;
+  cursor:pointer;
+}
+
+.avatar.selected{
+  background:linear-gradient(135deg,#7c3aed,#9333ea);
+}
+
+.option{
+  background:#334155;
+  padding:12px;
+  border-radius:12px;
+  margin:6px 0;
+  cursor:pointer;
+}
+
+.option:hover{
+  background:#7c3aed;
+}
+
+.correct{
+  background:#16a34a !important;
+}
+
+.rank-card{
+  background:#334155;
+  padding:10px;
+  border-radius:12px;
+  margin:6px 0;
+}
+
+.rank-card:nth-child(1){
+  background:linear-gradient(135deg,#facc15,#f59e0b);
+  color:black;
+  font-weight:700;
+}
+
 .hidden{display:none;}
+
+#timer{
+  font-size:22px;
+  margin-bottom:10px;
+}
+
 </style>
 </head>
 <body>
 
 <div class="card">
 
+<!-- HOME -->
 <div id="home">
   <div class="title">Mind<br>Matrix</div>
 
-  <input id="name" placeholder="Enter your name">
+  <input id="nameInput" placeholder="Enter your name">
 
   <div>Select Avatar</div>
   <div class="avatars">
@@ -44,15 +142,16 @@ button{margin-top:18px;padding:16px;border-radius:20px;border:none;cursor:pointe
     <div class="avatar" onclick="selectAvatar(this)">🤖</div>
   </div>
 
-  <div>Create Room</div>
+  <div style="margin-top:15px;">Difficulty</div>
   <select id="difficulty">
     <option value="easy">Easy</option>
     <option value="medium">Medium</option>
     <option value="hard">Hard</option>
   </select>
 
+  <div>Category</div>
   <select id="category">
-    <option value="mix">All Categories</option>
+    <option value="mix">Mix (All)</option>
     <option value="9">General Knowledge</option>
     <option value="17">Science & Nature</option>
     <option value="23">History</option>
@@ -63,29 +162,44 @@ button{margin-top:18px;padding:16px;border-radius:20px;border:none;cursor:pointe
 
   <input id="maxQ" type="number" value="5">
 
+  <label style="margin-top:10px;display:block;">
+    <input type="checkbox" id="powerUps">
+    Enable Power-Ups (50/50)
+  </label>
+
   <button class="create-btn" onclick="createRoom()">Create Room</button>
 
-  <div class="divider"></div>
+  <hr style="margin:25px 0;border:1px solid #334155;">
 
   <input id="joinCode" placeholder="Enter Room Code">
   <button class="join-btn" onclick="joinRoom()">Join Room</button>
 </div>
 
+<!-- LOBBY -->
 <div id="lobby" class="hidden">
   <h3>Room Code: <span id="roomCode"></span></h3>
   <div id="players"></div>
   <button class="create-btn" id="startBtn" onclick="startGame()">Start Game</button>
 </div>
 
+<!-- GAME -->
 <div id="game" class="hidden">
   <div id="qCount"></div>
-  <h2 id="question"></h2>
+  <div id="timer"></div>
+  <h2 id="question" style="margin:10px 0;"></h2>
+
+  <button id="btn5050" class="create-btn hidden" onclick="use5050()">
+    Use 50/50
+  </button>
+
   <div id="options"></div>
   <h3 id="result"></h3>
-  <h3>Leaderboard</h3>
+
+  <h3 style="margin-top:15px;">Leaderboard</h3>
   <div id="leaderboard"></div>
 </div>
 
+<!-- END -->
 <div id="end" class="hidden">
   <h2 id="winner"></h2>
   <div id="podium"></div>
@@ -96,10 +210,32 @@ button{margin-top:18px;padding:16px;border-radius:20px;border:none;cursor:pointe
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+
 const socket = io();
-let myName="";
+
 let selectedAvatar="😎";
-let isHost=false;
+let myName="";
+let timerInterval;
+
+// ELEMENTS
+const home=document.getElementById("home");
+const lobby=document.getElementById("lobby");
+const game=document.getElementById("game");
+const end=document.getElementById("end");
+
+const nameInput=document.getElementById("nameInput");
+const difficulty=document.getElementById("difficulty");
+const category=document.getElementById("category");
+const maxQ=document.getElementById("maxQ");
+const powerUps=document.getElementById("powerUps");
+
+const qCount=document.getElementById("qCount");
+const question=document.getElementById("question");
+const options=document.getElementById("options");
+const result=document.getElementById("result");
+const leaderboard=document.getElementById("leaderboard");
+const timer=document.getElementById("timer");
+const btn5050=document.getElementById("btn5050");
 
 function selectAvatar(el){
   document.querySelectorAll(".avatar").forEach(a=>a.classList.remove("selected"));
@@ -108,31 +244,42 @@ function selectAvatar(el){
 }
 
 function createRoom(){
-  const name=document.getElementById("name").value.trim();
-  const maxQuestions=document.getElementById("maxQ").value;
-  const difficulty=document.getElementById("difficulty").value;
-  const category=document.getElementById("category").value;
+  const name=nameInput.value.trim();
   if(!name) return alert("Enter name");
+
   myName=name;
-  socket.emit("create-room",{name,maxQuestions,difficulty,category,avatar:selectedAvatar});
+
+  socket.emit("create-room",{
+    name,
+    maxQuestions:maxQ.value,
+    difficulty:difficulty.value,
+    category:category.value,
+    avatar:selectedAvatar,
+    powerUps:powerUps.checked
+  });
 }
 
 function joinRoom(){
-  const name=document.getElementById("name").value.trim();
-  const roomCode=document.getElementById("joinCode").value.trim();
-  if(!name||!roomCode) return alert("Enter name & code");
+  const name=nameInput.value.trim();
+  const code=document.getElementById("joinCode").value.trim();
+  if(!name||!code) return alert("Enter name & code");
+
   myName=name;
-  socket.emit("join-room",{name,roomCode,avatar:selectedAvatar});
+
+  socket.emit("join-room",{
+    name,
+    roomCode:code,
+    avatar:selectedAvatar
+  });
 }
 
 socket.on("error",(msg)=>alert(msg));
 
 socket.on("room-joined",(data)=>{
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("lobby").classList.remove("hidden");
+  home.classList.add("hidden");
+  lobby.classList.remove("hidden");
   document.getElementById("roomCode").innerText=data.roomCode;
-  isHost=data.isHost;
-  document.getElementById("startBtn").style.display=isHost?"block":"none";
+  document.getElementById("startBtn").style.display=data.isHost?"block":"none";
 });
 
 socket.on("lobby-update",(players)=>{
@@ -145,27 +292,53 @@ function startGame(){
 }
 
 socket.on("new-question",(data)=>{
-  document.getElementById("lobby").classList.add("hidden");
-  document.getElementById("game").classList.remove("hidden");
-  document.getElementById("qCount").innerText=`Question ${data.qNum}/${data.max}`;
-  document.getElementById("question").innerHTML=data.q.text;
-  document.getElementById("result").innerText="";
-  const box=document.getElementById("options");
-  box.innerHTML="";
+  lobby.classList.add("hidden");
+  game.classList.remove("hidden");
+
+  qCount.innerText=`Question ${data.qNum}/${data.max}`;
+  question.innerHTML=data.q.text;
+  result.innerText="";
+  options.innerHTML="";
+
+  let timeLeft=data.time/1000;
+  timer.innerText=`⏳ ${timeLeft}s`;
+
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    timer.innerText=`⏳ ${timeLeft}s`;
+    if(timeLeft<=0) clearInterval(timerInterval);
+  },1000);
+
+  btn5050.classList.toggle("hidden",!data.powerUpsEnabled);
+
   data.q.options.forEach(opt=>{
     const div=document.createElement("div");
     div.className="option";
     div.innerHTML=opt;
     div.onclick=()=>{
       socket.emit("submit-answer",opt);
-      Array.from(box.children).forEach(c=>c.onclick=null);
+      Array.from(options.children).forEach(c=>c.onclick=null);
     };
-    box.appendChild(div);
+    options.appendChild(div);
+  });
+});
+
+function use5050(){
+  socket.emit("use-5050");
+  btn5050.classList.add("hidden");
+}
+
+socket.on("apply-5050",(removed)=>{
+  document.querySelectorAll(".option").forEach(o=>{
+    if(removed.includes(o.innerHTML)){
+      o.style.visibility="hidden";
+    }
   });
 });
 
 socket.on("leaderboard-update",(players)=>{
-  document.getElementById("leaderboard").innerHTML =
+  leaderboard.innerHTML=
     players.map((p,i)=>`
       <div class="rank-card">
         ${i===0?"🥇":i===1?"🥈":i===2?"🥉":"🎯"} 
@@ -175,23 +348,23 @@ socket.on("leaderboard-update",(players)=>{
 });
 
 socket.on("reveal-answer",(correct)=>{
+  clearInterval(timerInterval);
   document.querySelectorAll(".option").forEach(o=>{
-    if(o.innerHTML===correct){
-      o.classList.add("correct");
-    }
+    if(o.innerHTML===correct) o.classList.add("correct");
   });
 });
 
 socket.on("result",(data)=>{
-  document.getElementById("result").innerText=
-    data.correct?"Correct! 🎉":"Wrong ❌";
+  result.innerText=data.correct?"Correct! 🎉":"Wrong ❌";
 });
 
 socket.on("game-over",(players)=>{
-  document.getElementById("game").classList.add("hidden");
-  document.getElementById("end").classList.remove("hidden");
+  game.classList.add("hidden");
+  end.classList.remove("hidden");
+
   document.getElementById("winner").innerText=
     players[0].name===myName?"🏆 YOU WIN!":"💀 YOU LOST";
+
   document.getElementById("podium").innerHTML=
     players.map((p,i)=>`
       <div class="rank-card">
@@ -199,7 +372,7 @@ socket.on("game-over",(players)=>{
       </div>
     `).join("");
 });
-</script>
 
+</script>
 </body>
 </html>
