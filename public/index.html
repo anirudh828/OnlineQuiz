@@ -89,13 +89,11 @@ body{
 .title{
   animation:glowPulse 2.5s infinite ease-in-out;
 }
-@media(max-width:600px){
+  @media(max-width:600px){
   .title{
     font-size:40px;
   }
 }
-
-
 input, select{
   width:100%;
   padding:18px;
@@ -301,11 +299,6 @@ input:focus, select:focus{
   <h2 id="question" style="margin:20px 0;"></h2>
   <div id="options"></div>
   <h3 id="result"></h3>
-
-  <!-- ADD THIS PART BELOW -->
-  <h3 style="margin-top:20px;">Leaderboard</h3>
-  <div id="leaderboard"></div>
-
 </div>
 
 <div id="end" class="hidden">
@@ -317,7 +310,6 @@ input:focus, select:focus{
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script>
 <script>
 const socket = io();
 let myName="";
@@ -336,7 +328,7 @@ function createRoom(){
   const difficulty=document.getElementById("difficulty").value;
   if(!name) return alert("Enter name");
   myName=name;
-  socket.emit("create-room",{name,maxQuestions,difficulty,avatar:selectedAvatar});
+  socket.emit("create-room",{name,maxQuestions,difficulty});
 }
 
 function joinRoom(){
@@ -344,10 +336,8 @@ function joinRoom(){
   const roomCode=document.getElementById("joinCode").value.trim();
   if(!name||!roomCode) return alert("Enter name & code");
   myName=name;
-  socket.emit("join-room",{name,roomCode,avatar:selectedAvatar});
+  socket.emit("join-room",{name,roomCode});
 }
-
-socket.on("error",(msg)=>alert(msg));
 
 socket.on("room-joined",(data)=>{
   document.getElementById("home").classList.add("hidden");
@@ -390,16 +380,6 @@ socket.on("new-question",(data)=>{
   });
 });
 
-socket.on("leaderboard-update",(players)=>{
-  document.getElementById("leaderboard").innerHTML =
-    players.map((p,i)=>`
-      <div class="rank-card">
-        ${i===0?"🥇":i===1?"🥈":i===2?"🥉":"🎯"} 
-        ${p.avatar} ${p.name} - ${p.score}
-      </div>
-    `).join("");
-});
-
 socket.on("reveal-answer",(correct)=>{
   document.querySelectorAll(".option").forEach(o=>{
     if(o.innerHTML===correct){
@@ -423,7 +403,7 @@ socket.on("game-over",(players)=>{
   document.getElementById("podium").innerHTML=
     players.map((p,i)=>`
       <div class="rank-card">
-        ${i===0?"🥇":i===1?"🥈":"🥉"} ${p.avatar} ${p.name} - ${p.score}
+        ${i===0?"🥇":i===1?"🥈":"🥉"} ${p.name} - ${p.score}
       </div>
     `).join("");
 });
