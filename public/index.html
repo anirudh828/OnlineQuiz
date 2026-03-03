@@ -8,143 +8,35 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-
-body{
-  font-family:system-ui,-apple-system,sans-serif;
-  background:#0f172a;
-  color:#e2e8f0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-}
-
-.card{
-  width:100%;
-  max-width:520px;
-  background:#1e293b;
-  padding:40px 35px;
-  border-radius:28px;
-  box-shadow:0 30px 80px rgba(0,0,0,0.6);
-}
-
-.title{
-  text-align:center;
-  font-size:60px;
-  margin-bottom:30px;
-  font-family:'Audiowide', cursive;
-  letter-spacing:4px;
-  line-height:1.1;
-  color:white;
-  text-shadow:
-    0 0 10px #7c3aed,
-    0 0 20px #7c3aed,
-    0 0 40px #9333ea;
-}
-
-input, select{
-  width:100%;
-  padding:16px;
-  border-radius:18px;
-  border:none;
-  background:#334155;
-  color:white;
-  font-size:16px;
-  margin-top:15px;
-  outline:none;
-}
-
-button{
-  margin-top:18px;
-  padding:16px;
-  border-radius:20px;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-  width:100%;
-}
-
-.create-btn{
-  background:linear-gradient(135deg,#7c3aed,#9333ea);
-  color:white;
-}
-
-.join-btn{
-  background:#e2e8f0;
-  color:black;
-}
-
-.divider{
-  height:1px;
-  background:#334155;
-  margin:30px 0;
-}
-
-.avatars{
-  display:flex;
-  justify-content:space-between;
-  margin-top:15px;
-}
-
-.avatar{
-  font-size:26px;
-  padding:14px;
-  border-radius:18px;
-  cursor:pointer;
-}
-
-.avatar.selected{
-  background:linear-gradient(135deg,#7c3aed,#9333ea);
-  box-shadow:0 0 20px #7c3aed;
-}
-
-.option{
-  background:#334155;
-  padding:14px;
-  border-radius:14px;
-  margin:8px 0;
-  cursor:pointer;
-}
-
-.option:hover{
-  background:#7c3aed;
-}
-
-.correct{
-  background:#16a34a !important;
-}
-
-.rank-card{
-  background:#334155;
-  padding:10px;
-  border-radius:14px;
-  margin:6px 0;
-}
-
-.rank-card:nth-child(1){
-  background:linear-gradient(135deg,#facc15,#f59e0b);
-  color:black;
-  font-weight:700;
-}
-
+body{font-family:system-ui;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.card{width:100%;max-width:520px;background:#1e293b;padding:40px 35px;border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,0.6);}
+.title{text-align:center;font-size:60px;margin-bottom:30px;font-family:'Audiowide';color:white;}
+input,select{width:100%;padding:16px;border-radius:18px;border:none;background:#334155;color:white;font-size:16px;margin-top:15px;}
+button{margin-top:18px;padding:16px;border-radius:20px;border:none;cursor:pointer;font-weight:600;width:100%;}
+.create-btn{background:linear-gradient(135deg,#7c3aed,#9333ea);color:white;}
+.join-btn{background:#e2e8f0;color:black;}
+.divider{height:1px;background:#334155;margin:30px 0;}
+.avatars{display:flex;justify-content:space-between;margin-top:15px;}
+.avatar{font-size:26px;padding:14px;border-radius:18px;cursor:pointer;}
+.avatar.selected{background:linear-gradient(135deg,#7c3aed,#9333ea);}
+.option{background:#334155;padding:14px;border-radius:14px;margin:8px 0;cursor:pointer;}
+.option:hover{background:#7c3aed;}
+.correct{background:#16a34a !important;}
+.rank-card{background:#334155;padding:10px;border-radius:14px;margin:6px 0;}
+.rank-card:nth-child(1){background:linear-gradient(135deg,#facc15,#f59e0b);color:black;font-weight:700;}
 .hidden{display:none;}
 </style>
 </head>
-
 <body>
 
 <div class="card">
 
-<!-- HOME -->
 <div id="home">
-  <div class="title">
-    Mind<br>Matrix
-  </div>
+  <div class="title">Mind<br>Matrix</div>
 
   <input id="name" placeholder="Enter your name">
 
-  <div style="margin-top:15px;">Select Avatar</div>
+  <div>Select Avatar</div>
   <div class="avatars">
     <div class="avatar selected" onclick="selectAvatar(this)">😎</div>
     <div class="avatar" onclick="selectAvatar(this)">🔥</div>
@@ -152,11 +44,21 @@ button{
     <div class="avatar" onclick="selectAvatar(this)">🤖</div>
   </div>
 
-  <div style="margin-top:20px;">Create Room</div>
+  <div>Create Room</div>
   <select id="difficulty">
     <option value="easy">Easy</option>
     <option value="medium">Medium</option>
     <option value="hard">Hard</option>
+  </select>
+
+  <select id="category">
+    <option value="mix">All Categories</option>
+    <option value="9">General Knowledge</option>
+    <option value="17">Science & Nature</option>
+    <option value="23">History</option>
+    <option value="21">Sports</option>
+    <option value="18">Computers</option>
+    <option value="11">Movies</option>
   </select>
 
   <input id="maxQ" type="number" value="5">
@@ -169,25 +71,21 @@ button{
   <button class="join-btn" onclick="joinRoom()">Join Room</button>
 </div>
 
-<!-- LOBBY -->
 <div id="lobby" class="hidden">
   <h3>Room Code: <span id="roomCode"></span></h3>
   <div id="players"></div>
   <button class="create-btn" id="startBtn" onclick="startGame()">Start Game</button>
 </div>
 
-<!-- GAME -->
 <div id="game" class="hidden">
   <div id="qCount"></div>
-  <h2 id="question" style="margin:15px 0;"></h2>
+  <h2 id="question"></h2>
   <div id="options"></div>
   <h3 id="result"></h3>
-
-  <h3 style="margin-top:20px;">Leaderboard</h3>
+  <h3>Leaderboard</h3>
   <div id="leaderboard"></div>
 </div>
 
-<!-- END -->
 <div id="end" class="hidden">
   <h2 id="winner"></h2>
   <div id="podium"></div>
@@ -213,9 +111,10 @@ function createRoom(){
   const name=document.getElementById("name").value.trim();
   const maxQuestions=document.getElementById("maxQ").value;
   const difficulty=document.getElementById("difficulty").value;
+  const category=document.getElementById("category").value;
   if(!name) return alert("Enter name");
   myName=name;
-  socket.emit("create-room",{name,maxQuestions,difficulty,avatar:selectedAvatar});
+  socket.emit("create-room",{name,maxQuestions,difficulty,category,avatar:selectedAvatar});
 }
 
 function joinRoom(){
@@ -248,13 +147,9 @@ function startGame(){
 socket.on("new-question",(data)=>{
   document.getElementById("lobby").classList.add("hidden");
   document.getElementById("game").classList.remove("hidden");
-
-  document.getElementById("qCount").innerText=
-    `Question ${data.qNum}/${data.max}`;
-
+  document.getElementById("qCount").innerText=`Question ${data.qNum}/${data.max}`;
   document.getElementById("question").innerHTML=data.q.text;
   document.getElementById("result").innerText="";
-
   const box=document.getElementById("options");
   box.innerHTML="";
   data.q.options.forEach(opt=>{
@@ -295,10 +190,8 @@ socket.on("result",(data)=>{
 socket.on("game-over",(players)=>{
   document.getElementById("game").classList.add("hidden");
   document.getElementById("end").classList.remove("hidden");
-
   document.getElementById("winner").innerText=
     players[0].name===myName?"🏆 YOU WIN!":"💀 YOU LOST";
-
   document.getElementById("podium").innerHTML=
     players.map((p,i)=>`
       <div class="rank-card">
