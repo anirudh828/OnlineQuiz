@@ -122,32 +122,6 @@ button{
   margin-bottom:8px;
 }
 
-/* POWERUP STYLING */
-
-.powerup-btn{
-  margin-top:15px;
-  background:#0ea5e9;
-  color:white;
-  padding:10px;
-  border-radius:12px;
-  font-weight:600;
-  width:100%;
-  border:none;
-  cursor:pointer;
-}
-
-.powerup-btn:disabled{
-  background:#475569;
-  cursor:not-allowed;
-}
-
-#cooldownText{
-  margin-top:5px;
-  font-size:13px;
-  color:#94a3b8;
-  text-align:center;
-}
-
 </style>
 </head>
 
@@ -189,11 +163,6 @@ button{
 
   <input id="maxQ" type="number" value="5">
 
-  <label style="margin-top:10px;display:flex;align-items:center;gap:8px;">
-    <input type="checkbox" id="powerUps">
-    Enable Power-Ups (50/50)
-  </label>
-
   <button class="create-btn" onclick="createRoom()">Create Room</button>
 
   <hr style="margin:20px 0;border:1px solid #334155;">
@@ -216,13 +185,6 @@ button{
   <h2 id="question" style="margin:8px 0;"></h2>
 
   <div id="options"></div>
-
-  <div id="powerupArea" class="hidden">
-    <button id="btn5050" class="powerup-btn" onclick="use5050()">
-      ⚡ Use 50/50
-    </button>
-    <div id="cooldownText"></div>
-  </div>
 
   <h3 id="result"></h3>
 
@@ -258,7 +220,6 @@ const nameInput=document.getElementById("nameInput");
 const difficulty=document.getElementById("difficulty");
 const category=document.getElementById("category");
 const maxQ=document.getElementById("maxQ");
-const powerUps=document.getElementById("powerUps");
 
 const qCount=document.getElementById("qCount");
 const question=document.getElementById("question");
@@ -266,9 +227,6 @@ const options=document.getElementById("options");
 const result=document.getElementById("result");
 const leaderboard=document.getElementById("leaderboard");
 const timer=document.getElementById("timer");
-const btn5050=document.getElementById("btn5050");
-const powerupArea=document.getElementById("powerupArea");
-const cooldownText=document.getElementById("cooldownText");
 
 function selectAvatar(el){
   document.querySelectorAll(".avatar").forEach(a=>a.classList.remove("selected"));
@@ -287,8 +245,7 @@ function createRoom(){
     maxQuestions:maxQ.value,
     difficulty:difficulty.value,
     category:category.value,
-    avatar:selectedAvatar,
-    powerUps:powerUps.checked
+    avatar:selectedAvatar
   });
 }
 
@@ -332,8 +289,6 @@ socket.on("new-question",(data)=>{
   question.innerHTML=data.q.text;
   result.innerText="";
   options.innerHTML="";
-  cooldownText.innerText="";
-  btn5050.disabled=false;
 
   let timeLeft=data.time/1000;
   timer.innerText=`⏳ ${timeLeft}s`;
@@ -345,8 +300,6 @@ socket.on("new-question",(data)=>{
     if(timeLeft<=0) clearInterval(timerInterval);
   },1000);
 
-  powerupArea.classList.toggle("hidden",!data.powerUpsEnabled);
-
   data.q.options.forEach(opt=>{
     const div=document.createElement("div");
     div.className="option";
@@ -356,31 +309,6 @@ socket.on("new-question",(data)=>{
       Array.from(options.children).forEach(c=>c.onclick=null);
     };
     options.appendChild(div);
-  });
-});
-
-function use5050(){
-  btn5050.disabled=true;
-  socket.emit("use-5050");
-
-  let cooldown=3;
-  cooldownText.innerText=`Cooldown: ${cooldown}s`;
-
-  const cdInterval=setInterval(()=>{
-    cooldown--;
-    cooldownText.innerText=`Cooldown: ${cooldown}s`;
-    if(cooldown<=0){
-      clearInterval(cdInterval);
-      cooldownText.innerText="";
-    }
-  },1000);
-}
-
-socket.on("apply-5050",(removed)=>{
-  document.querySelectorAll(".option").forEach(o=>{
-    if(removed.includes(o.innerHTML)){
-      o.style.visibility="hidden";
-    }
   });
 });
 
