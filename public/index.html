@@ -349,7 +349,7 @@ socket.on("room-joined",(data)=>{
 
 socket.on("lobby-update",(players)=>{
   document.getElementById("players").innerHTML=
-    players.map(p=>`<div>${p.name}</div>`).join("");
+    players.map(p=>`<div>${p.avatar} ${p.name}</div>`).join("");
 });
 
 function startGame(){
