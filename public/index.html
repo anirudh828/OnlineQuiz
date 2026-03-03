@@ -24,35 +24,35 @@ body{
   width:100%;
   max-width:520px;
   background:#1e293b;
-  padding:40px 35px;
+  padding:35px;
   border-radius:28px;
   box-shadow:0 30px 80px rgba(0,0,0,0.6);
 }
 
 .title{
   text-align:center;
-  font-size:60px;
-  margin-bottom:30px;
+  font-size:52px;
+  margin-bottom:25px;
   font-family:'Audiowide', cursive;
-  letter-spacing:4px;
+  letter-spacing:3px;
   color:white;
 }
 
 input,select{
   width:100%;
-  padding:14px;
-  border-radius:16px;
+  padding:12px;
+  border-radius:14px;
   border:none;
   background:#334155;
   color:white;
-  font-size:15px;
-  margin-top:12px;
+  font-size:14px;
+  margin-top:10px;
 }
 
 button{
-  margin-top:16px;
-  padding:14px;
-  border-radius:18px;
+  margin-top:14px;
+  padding:12px;
+  border-radius:14px;
   border:none;
   cursor:pointer;
   font-weight:600;
@@ -72,13 +72,13 @@ button{
 .avatars{
   display:flex;
   justify-content:space-between;
-  margin-top:12px;
+  margin-top:10px;
 }
 
 .avatar{
-  font-size:26px;
-  padding:12px;
-  border-radius:16px;
+  font-size:24px;
+  padding:10px;
+  border-radius:12px;
   cursor:pointer;
 }
 
@@ -88,8 +88,8 @@ button{
 
 .option{
   background:#334155;
-  padding:12px;
-  border-radius:12px;
+  padding:10px;
+  border-radius:10px;
   margin:6px 0;
   cursor:pointer;
 }
@@ -104,9 +104,9 @@ button{
 
 .rank-card{
   background:#334155;
-  padding:10px;
-  border-radius:12px;
-  margin:6px 0;
+  padding:8px;
+  border-radius:10px;
+  margin:5px 0;
 }
 
 .rank-card:nth-child(1){
@@ -118,12 +118,39 @@ button{
 .hidden{display:none;}
 
 #timer{
-  font-size:22px;
-  margin-bottom:10px;
+  font-size:20px;
+  margin-bottom:8px;
+}
+
+/* POWERUP STYLING */
+
+.powerup-btn{
+  margin-top:15px;
+  background:#0ea5e9;
+  color:white;
+  padding:10px;
+  border-radius:12px;
+  font-weight:600;
+  width:100%;
+  border:none;
+  cursor:pointer;
+}
+
+.powerup-btn:disabled{
+  background:#475569;
+  cursor:not-allowed;
+}
+
+#cooldownText{
+  margin-top:5px;
+  font-size:13px;
+  color:#94a3b8;
+  text-align:center;
 }
 
 </style>
 </head>
+
 <body>
 
 <div class="card">
@@ -134,7 +161,7 @@ button{
 
   <input id="nameInput" placeholder="Enter your name">
 
-  <div>Select Avatar</div>
+  <div style="margin-top:10px;">Select Avatar</div>
   <div class="avatars">
     <div class="avatar selected" onclick="selectAvatar(this)">😎</div>
     <div class="avatar" onclick="selectAvatar(this)">🔥</div>
@@ -142,7 +169,7 @@ button{
     <div class="avatar" onclick="selectAvatar(this)">🤖</div>
   </div>
 
-  <div style="margin-top:15px;">Difficulty</div>
+  <div style="margin-top:12px;">Difficulty</div>
   <select id="difficulty">
     <option value="easy">Easy</option>
     <option value="medium">Medium</option>
@@ -162,16 +189,14 @@ button{
 
   <input id="maxQ" type="number" value="5">
 
-  <div class="powerup-row">
-  <label class="powerup-label">
+  <label style="margin-top:10px;display:flex;align-items:center;gap:8px;">
     <input type="checkbox" id="powerUps">
-    <span>Enable Power-Ups (50/50)</span>
+    Enable Power-Ups (50/50)
   </label>
-</div>
 
   <button class="create-btn" onclick="createRoom()">Create Room</button>
 
-  <hr style="margin:25px 0;border:1px solid #334155;">
+  <hr style="margin:20px 0;border:1px solid #334155;">
 
   <input id="joinCode" placeholder="Enter Room Code">
   <button class="join-btn" onclick="joinRoom()">Join Room</button>
@@ -188,16 +213,20 @@ button{
 <div id="game" class="hidden">
   <div id="qCount"></div>
   <div id="timer"></div>
-  <h2 id="question" style="margin:10px 0;"></h2>
-
-  <button id="btn5050" class="create-btn hidden" onclick="use5050()">
-    Use 50/50
-  </button>
+  <h2 id="question" style="margin:8px 0;"></h2>
 
   <div id="options"></div>
+
+  <div id="powerupArea" class="hidden">
+    <button id="btn5050" class="powerup-btn" onclick="use5050()">
+      ⚡ Use 50/50
+    </button>
+    <div id="cooldownText"></div>
+  </div>
+
   <h3 id="result"></h3>
 
-  <h3 style="margin-top:15px;">Leaderboard</h3>
+  <h3 style="margin-top:12px;">Leaderboard</h3>
   <div id="leaderboard"></div>
 </div>
 
@@ -219,7 +248,7 @@ let selectedAvatar="😎";
 let myName="";
 let timerInterval;
 
-// ELEMENTS
+// Elements
 const home=document.getElementById("home");
 const lobby=document.getElementById("lobby");
 const game=document.getElementById("game");
@@ -238,6 +267,8 @@ const result=document.getElementById("result");
 const leaderboard=document.getElementById("leaderboard");
 const timer=document.getElementById("timer");
 const btn5050=document.getElementById("btn5050");
+const powerupArea=document.getElementById("powerupArea");
+const cooldownText=document.getElementById("cooldownText");
 
 function selectAvatar(el){
   document.querySelectorAll(".avatar").forEach(a=>a.classList.remove("selected"));
@@ -301,6 +332,8 @@ socket.on("new-question",(data)=>{
   question.innerHTML=data.q.text;
   result.innerText="";
   options.innerHTML="";
+  cooldownText.innerText="";
+  btn5050.disabled=false;
 
   let timeLeft=data.time/1000;
   timer.innerText=`⏳ ${timeLeft}s`;
@@ -312,7 +345,7 @@ socket.on("new-question",(data)=>{
     if(timeLeft<=0) clearInterval(timerInterval);
   },1000);
 
-  btn5050.classList.toggle("hidden",!data.powerUpsEnabled);
+  powerupArea.classList.toggle("hidden",!data.powerUpsEnabled);
 
   data.q.options.forEach(opt=>{
     const div=document.createElement("div");
@@ -327,8 +360,20 @@ socket.on("new-question",(data)=>{
 });
 
 function use5050(){
+  btn5050.disabled=true;
   socket.emit("use-5050");
-  btn5050.classList.add("hidden");
+
+  let cooldown=3;
+  cooldownText.innerText=`Cooldown: ${cooldown}s`;
+
+  const cdInterval=setInterval(()=>{
+    cooldown--;
+    cooldownText.innerText=`Cooldown: ${cooldown}s`;
+    if(cooldown<=0){
+      clearInterval(cdInterval);
+      cooldownText.innerText="";
+    }
+  },1000);
 }
 
 socket.on("apply-5050",(removed)=>{
