@@ -5,10 +5,7 @@ const fetch = require("node-fetch");
 
 const app = express();
 const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: { origin: "*" }
-});
+const io = new Server(server);
 
 app.use(express.static("public"));
 
@@ -20,15 +17,6 @@ function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Proper shuffle
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 async function preloadQuestions(amount = 5, difficulty = "easy") {
   try {
     const res = await fetch(
@@ -38,7 +26,8 @@ async function preloadQuestions(amount = 5, difficulty = "easy") {
     if (!data.results) return [];
 
     return data.results.map(q => {
-      const options = shuffle([...q.incorrect_answers, q.correct_answer]);
+      const options = [...q.incorrect_answers, q.correct_answer];
+      options.sort(() => Math.random() - 0.5);
       return {
         text: q.question,
         options,
@@ -50,25 +39,15 @@ async function preloadQuestions(amount = 5, difficulty = "easy") {
   }
 }
 
-function emitLeaderboard(roomId) {
-  const room = rooms[roomId];
-  if (!room) return;
-
-  const sorted = Object.values(room.players).sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return a.totalTime - b.totalTime;
-  });
-
-  io.to(roomId).emit("leaderboard-update", sorted);
-}
-
 io.on("connection", (socket) => {
 
+  console.log("Connected:", socket.id);
+
   socket.on("create-room", async (data) => {
+
     const name = data.name;
     const maxQuestions = parseInt(data.maxQuestions) || 5;
     const difficulty = data.difficulty || "easy";
-    const avatar = data.avatar || "😎";
 
     let roomCode;
     do { roomCode = generateCode(); }
@@ -83,13 +62,11 @@ io.on("connection", (socket) => {
       players: {},
       answered: {},
       timer: null,
-      startTime: 0,
-      maxPlayers: 6
+      startTime: 0
     };
 
     rooms[roomCode].players[socket.id] = {
       name,
-      avatar,
       score: 0,
       totalTime: 0
     };
@@ -97,7 +74,10 @@ io.on("connection", (socket) => {
     socket.join(roomCode);
     socket.roomId = roomCode;
 
-    socket.emit("room-joined", { roomCode, isHost: true });
+    socket.emit("room-joined", {
+      roomCode,
+      isHost: true
+    });
 
     io.to(roomCode).emit("lobby-update",
       Object.values(rooms[roomCode].players)
@@ -105,16 +85,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-room", (data) => {
-    const room = rooms[data.roomCode];
-    if (!room) return socket.emit("error", "Invalid Room Code");
 
-    if (Object.keys(room.players).length >= room.maxPlayers) {
-      return socket.emit("error", "Room Full");
+    const room = rooms[data.roomCode];
+    if (!room) {
+      return socket.emit("error", "Invalid Room Code");
     }
 
     room.players[socket.id] = {
       name: data.name,
-      avatar: data.avatar || "😎",
       score: 0,
       totalTime: 0
     };
@@ -133,9 +111,16 @@ io.on("connection", (socket) => {
   });
 
   socket.on("start-game", () => {
+
     const room = rooms[socket.roomId];
     if (!room) return;
-    if (room.host !== socket.id) return;
+
+    if (room.host !== socket.id) {
+      console.log("Blocked: Not host");
+      return;
+    }
+
+    console.log("Game starting in room:", socket.roomId);
 
     sendQuestion(socket.roomId);
   });
@@ -167,6 +152,7 @@ io.on("connection", (socket) => {
   }
 
   socket.on("submit-answer", (answer) => {
+
     const room = rooms[socket.roomId];
     if (!room) return;
     if (room.answered[socket.id]) return;
@@ -186,9 +172,10 @@ io.on("connection", (socket) => {
       correct: answer === room.questions[room.current].correct
     });
 
-    emitLeaderboard(socket.roomId);
+    const total = Object.keys(room.players).length;
+    const answered = Object.keys(room.answered).length;
 
-    if (Object.keys(room.answered).length >= Object.keys(room.players).length) {
+    if (answered >= total) {
       reveal(socket.roomId);
     }
   });
@@ -204,8 +191,6 @@ io.on("connection", (socket) => {
       room.questions[room.current].correct
     );
 
-    emitLeaderboard(roomId);
-
     setTimeout(() => {
       room.current++;
       sendQuestion(roomId);
@@ -216,8 +201,11 @@ io.on("connection", (socket) => {
     const room = rooms[roomId];
     if (!room) return;
 
-    const players = Object.values(room.players).sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
+    const players = Object.values(room.players);
+
+    players.sort((a, b) => {
+      if (b.score !== a.score)
+        return b.score - a.score;
       return a.totalTime - b.totalTime;
     });
 
@@ -230,12 +218,6 @@ io.on("connection", (socket) => {
     if (!room) return;
 
     delete room.players[socket.id];
-
-    if (Object.keys(room.players).length === 0) {
-      clearTimeout(room.timer);
-      delete rooms[socket.roomId];
-      return;
-    }
 
     io.to(socket.roomId).emit("lobby-update",
       Object.values(room.players)
