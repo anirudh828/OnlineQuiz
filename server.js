@@ -58,7 +58,7 @@ function emitLeaderboard(roomId) {
 io.on("connection", (socket) => {
 
   socket.on("create-room", async (data) => {
-    const { name, maxQuestions, difficulty, category, avatar, powerUps } = data;
+    const { name, maxQuestions, difficulty, category, avatar } = data;
 
     let roomCode;
     do { roomCode = generateCode(); } while (rooms[roomCode]);
@@ -74,8 +74,7 @@ io.on("connection", (socket) => {
       started: false,
       timer: null,
       startTime: 0,
-      maxPlayers: 6,
-      powerUpsEnabled: powerUps === true
+      maxPlayers: 8,
     };
 
     rooms[roomCode].players[socket.id] = {
@@ -83,7 +82,6 @@ io.on("connection", (socket) => {
       avatar,
       score: 0,
       totalTime: 0,
-      used5050: false
     };
 
     socket.join(roomCode);
@@ -135,32 +133,17 @@ io.on("connection", (socket) => {
     room.answered = {};
     room.startTime = Date.now();
 
-    io.to(roomId).emit("new-question", {
-      q: room.questions[room.current],
-      qNum: room.current + 1,
-      max: room.questions.length,
-      time: QUESTION_TIME,
-      powerUpsEnabled: room.powerUpsEnabled
-    });
+   io.to(roomId).emit("new-question", {
+  q: room.questions[room.current],
+  qNum: room.current + 1,
+  max: room.questions.length,
+  time: QUESTION_TIME
+});
 
     room.timer = setTimeout(() => reveal(roomId), QUESTION_TIME);
   }
 
-  socket.on("use-5050", () => {
-    const room = rooms[socket.roomId];
-    if (!room || !room.powerUpsEnabled) return;
 
-    const player = room.players[socket.id];
-    if (!player || player.used5050) return;
-
-    player.used5050 = true;
-
-    const question = room.questions[room.current];
-    const wrong = question.options.filter(o => o !== question.correct);
-    const removed = shuffle(wrong).slice(0, 2);
-
-    socket.emit("apply-5050", removed);
-  });
 
   socket.on("submit-answer", (answer) => {
     const room = rooms[socket.roomId];
